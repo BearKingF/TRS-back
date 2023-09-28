@@ -22,6 +22,8 @@ config.yaml
 
 go.mod
 
+go.sum
+
 # Go workspace file
 go.work
 
