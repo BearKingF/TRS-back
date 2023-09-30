@@ -17,9 +17,10 @@ type RegisterData struct {
 	Major           string `json:"major" binding:"required"`
 	Password        string `json:"password" binding:"required"`
 	ConfirmPassword string `json:"confirm_password" binding:"required"`
+	Type            uint   `json:"type" binding:"required"`
 }
 
-/* 注册 */
+/* 注册(POST) */
 
 func Register(c *gin.Context) {
 
@@ -58,14 +59,23 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	//5. 判断账户类型是否合法
+	if data.Type != 1 && data.Type != 2 {
+		utils.JsonErrorResponse(c, 200511, "类型不合法")
+		return
+	}
+
 	//5. 注册用户
 	err = userService.Register(models.User{
-		Username: data.Username,
-		Sex:      data.Sex,
-		PhoneNum: data.PhoneNum,
-		Email:    data.Email,
-		Major:    data.Major,
-		Password: data.Password,
+		Username:  data.Username,
+		Sex:       data.Sex,
+		PhoneNum:  data.PhoneNum,
+		Email:     data.Email,
+		Major:     data.Major,
+		Password:  data.Password,
+		Type:      data.Type,
+		IsCaptain: false,
+		TeamID:    -1,
 	})
 	if err != nil {
 		utils.JsonInternalServerErrorResponse(c)

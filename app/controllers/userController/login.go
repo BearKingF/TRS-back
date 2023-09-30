@@ -13,7 +13,7 @@ type LoginData struct {
 	Password string `json:"password" binding:"required"`
 }
 
-/* 用户登录 */
+/* 登录(POST) */
 
 func Login(c *gin.Context) {
 
