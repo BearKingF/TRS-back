@@ -53,7 +53,7 @@ func Register(c *gin.Context) {
 	}
 
 	//4. 判断两次输入的密码是否一致
-	flag := userService.ComparePwd(data.Password, data.ConfirmPassword)
+	flag := userService.CheckPwd(data.Password, data.ConfirmPassword)
 	if !flag {
 		utils.JsonErrorResponse(c, 200506, "密码不一致")
 		return
@@ -66,7 +66,7 @@ func Register(c *gin.Context) {
 	}
 
 	//5. 注册用户
-	err = userService.Register(models.User{
+	err = userService.CreateUser(models.User{
 		Username:  data.Username,
 		Sex:       data.Sex,
 		PhoneNum:  data.PhoneNum,

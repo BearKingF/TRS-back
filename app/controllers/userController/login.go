@@ -45,7 +45,7 @@ func Login(c *gin.Context) {
 	}
 
 	//4. 判断密码是否正确
-	flag := userService.ComparePwd(data.Password, user.Password)
+	flag := userService.CheckPwd(data.Password, user.Password)
 	if !flag {
 		utils.JsonErrorResponse(c, 200503, "密码错误")
 		return

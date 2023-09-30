@@ -18,7 +18,10 @@ func Init() {
 	name := config.Config.GetString("database.name")
 
 	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8&parseTime=True&loc=Local", user, pass, host, port, name)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: true, // 关闭外键约束 提升数据库速度
+	})
 
 	if err != nil {
 		log.Fatal("Database connect failed: ", err)

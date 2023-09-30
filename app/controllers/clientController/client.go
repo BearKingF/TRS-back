@@ -58,7 +58,7 @@ func UpdateUserInfo(c *gin.Context) {
 	}
 
 	//判断若要修改密码，两次输入的密码是否一致
-	flag = userService.ComparePwd(data.Password, data.ConfirmPassword)
+	flag = userService.CheckPwd(data.Password, data.ConfirmPassword)
 	if !flag {
 		utils.JsonErrorResponse(c, 200506, "密码不一致")
 		return
@@ -102,6 +102,13 @@ func CreateTeam(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200507, "未登录")
 		return
 	}
+
+	user, _ := userService.GetUserByID(data.UserID)
+	if user.TeamID != -1 {
+		utils.JsonErrorResponse(c, 200510, "已加入团队") //限制每人只可加入一个团队
+		return
+	}
+
 	//判断团队名是否已被注册
 	err = teamService.CheckTeamExistByTeamName(data.TeamName)
 	if err == nil { //团队名已存在
