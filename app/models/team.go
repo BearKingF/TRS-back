@@ -6,4 +6,5 @@ type Team struct {
 	CaptainID uint   `json:"captain_id"`
 	Password  string `json:"-"`
 	Total     uint   `json:"total"`
+	Status    uint   `json:"status"` //状态：2表示未提交报名，1表示已提交
 }

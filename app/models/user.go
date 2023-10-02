@@ -11,5 +11,5 @@ type User struct {
 	//new!!
 	Type      uint `json:"type"`    //1 表示普通用户 2 表示管理员用户
 	TeamID    int  `json:"team_id"` //未加入团队时记为-1
-	IsCaptain bool `json:"-"`       //前端感觉不会用到
+	IsCaptain uint `json:"-"`       //前端感觉不会用到  队长记1 非队长记2
 }

@@ -10,20 +10,27 @@ func UpdateUserInfo(user models.User) error {
 	return result.Error
 }
 
-func UpdateTeamID(id uint, teamID uint) error {
+func UpdateTeamID(id uint, teamID int) error {
 	user, _ := GetUserByID(id)
-	user.TeamID = int(teamID)
+	user.TeamID = teamID
 	result := database.DB.Updates(&user)
 	return result.Error
 }
 
 func UpdateCaptainFlag(id uint) error { //更改isCaptain信息
 	user, _ := GetUserByID(id)
-	if user.IsCaptain == false {
-		user.IsCaptain = true
+	if user.IsCaptain == 2 {
+		user.IsCaptain = 1
 	} else {
-		user.IsCaptain = false
+		user.IsCaptain = 2
 	}
 	result := database.DB.Updates(&user)
+	return result.Error
+}
+
+func UpdateAllTeamID(teamID uint) error { //批量更新
+	//db.Model(User{}).Where("role = ?", "admin").Updates(User{Name: "hello", Age: 18})
+	//不知道对不对？
+	result := database.DB.Where(&models.User{TeamID: int(teamID)}).Updates(models.User{TeamID: -1})
 	return result.Error
 }

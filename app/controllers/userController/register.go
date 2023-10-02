@@ -74,7 +74,7 @@ func Register(c *gin.Context) {
 		Major:     data.Major,
 		Password:  data.Password,
 		Type:      data.Type,
-		IsCaptain: false,
+		IsCaptain: 2, //非队长
 		TeamID:    -1,
 	})
 	if err != nil {
