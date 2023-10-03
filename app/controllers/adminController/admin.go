@@ -5,7 +5,6 @@ import (
 	"TRS/app/services/teamService"
 	"TRS/app/utils"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 /* 获取所有团队信息(GET) */
@@ -29,28 +28,18 @@ func GetAllTeamInfo(c *gin.Context) {
 	}
 
 	//可以获得所有团队的信息
-	//var committedTeamList []models.Team
 	committedTeamList, count1, err := teamService.GetAllIsCommittedTeam(1)
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			committedTeamList = make([]teamService.TeamInfo, 0) //空切片[] 不同于nil!!!
-		} else {
-			utils.JsonInternalServerErrorResponse(c)
-			return
-		}
+	if err != nil { //注意：Find 查询不到记录是不报错的，所以这样写
+		utils.JsonInternalServerErrorResponse(c)
 	}
+
 	uncommittedTeamList, count2, err := teamService.GetAllIsCommittedTeam(2)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			uncommittedTeamList = make([]teamService.TeamInfo, 0) //空切片[]
-		} else {
-			utils.JsonInternalServerErrorResponse(c)
-			return
-		}
+		utils.JsonInternalServerErrorResponse(c)
 	}
 
 	count, err := teamService.GetAllTeamCount()
-	if err != nil && err != gorm.ErrRecordNotFound {
+	if err != nil { //注意：Count 查询不到记录也是不报错的
 		utils.JsonInternalServerErrorResponse(c)
 		return
 	}

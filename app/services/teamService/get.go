@@ -6,8 +6,9 @@ import (
 )
 
 func GetTeamMember(teamID uint) ([]models.User, error) {
-	result := database.DB.Where(&models.Team{TeamID: teamID}).First(&models.User{})
-	if result.Error != nil { //团队为空
+
+	result := database.DB.First(&models.User{}, teamID) // TeamID 为 models.User 的主键
+	if result.Error != nil {                            //团队为空
 		return nil, result.Error
 	}
 	var teamMemberList []models.User //切片
@@ -20,7 +21,9 @@ func GetTeamMember(teamID uint) ([]models.User, error) {
 
 func GetTeamByTeamID(teamID uint) (*models.Team, error) {
 	var team models.Team
-	result := database.DB.Where(&models.Team{TeamID: teamID}).First(&team)
+
+	//通过主键查询指定的某条记录，且主键为整型
+	result := database.DB.First(&team, teamID)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -35,26 +38,25 @@ type TeamInfo struct {
 }
 
 func GetAllIsCommittedTeam(R uint) ([]TeamInfo, int64, error) { //R取1或2
-	//确定有无记录存在
-	result := database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).First(&models.Team{})
-	if result.Error != nil {
-		return nil, 0, result.Error
-	}
+	//无需区分有无记录存在的情况
+
 	var teamList []TeamInfo
 
-	result = database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).Select("team_id", "team_name", "captain_id", "total").Find(&teamList)
+	//find 方法在查询不到记录时不会报错！（此处利用这个特点）
+	result := database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).Select("team_id", "team_name", "captain_id", "total").Find(&teamList)
+	//Debug(): SELECT `team_id`,`team_name`,`captain_id`,`total` FROM `teams` WHERE `teams`.`status` = R
+
 	//不加Select其实也可以……
-	if result.Error != nil {
-		return nil, 0, result.Error
-	}
-	return teamList, result.RowsAffected, nil //result.RowsAffected为记录条数
+	//result = database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).Debug().Find(&teamList)
+	//SELECT `teams`.`team_id`,`teams`.`team_name`,`teams`.`captain_id`,`teams`.`total` FROM `teams` WHERE `teams`.`status` = R
+
+	return teamList, result.RowsAffected, result.Error // result.RowsAffected 为记录条数
 }
 
 func GetAllTeamCount() (int64, error) { //获取记录总数
-	var count int64 //要求参数int64
-	result := database.DB.Model(&models.Team{}).Count(&count)
-	if result.Error != nil {
-		return 0, result.Error
-	}
-	return count, nil
+	var count int64                                           //要求参数int64
+	result := database.DB.Model(&models.Team{}).Count(&count) //此处必须要写 Model(&models.Team{})
+	//fmt.Println(result.Error)
+	// Count() 在查询不到记录时也不会报错
+	return count, result.Error
 }

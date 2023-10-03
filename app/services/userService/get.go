@@ -17,7 +17,8 @@ func GetUserByAccount(account string) (*models.User, error) {
 
 func GetUserByID(id uint) (*models.User, error) {
 	var user models.User
-	result := database.DB.Where(&models.User{ID: id}).First(&user)
+	//result := database.DB.Where(&models.User{ID: id}).First(&user)
+	result := database.DB.First(&user, id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
