@@ -27,23 +27,27 @@ func GetTeamByTeamID(teamID uint) (*models.Team, error) {
 	return &team, nil
 }
 
-func GetAllIsCommittedTeam(R uint) ([]models.Team, int64, error) { //R取1或2
+type TeamInfo struct {
+	TeamID    uint   `json:"team_id"`
+	TeamName  string `json:"team_name"`
+	CaptainID uint   `json:"captain_id"`
+	Total     uint   `json:"total"`
+}
+
+func GetAllIsCommittedTeam(R uint) ([]TeamInfo, int64, error) { //R取1或2
 	//确定有无记录存在
 	result := database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).First(&models.Team{})
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
-	var count int64
-	var teamList []models.Team
-	result = database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).Count(&count)
+	var teamList []TeamInfo
+
+	result = database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).Select("team_id", "team_name", "captain_id", "total").Find(&teamList)
+	//不加Select其实也可以……
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
-	result = database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).Find(&teamList) //可以这样写吗（怎么知道是team的那张表）
-	if result.Error != nil {
-		return nil, 0, result.Error
-	}
-	return teamList, count, nil
+	return teamList, result.RowsAffected, nil //result.RowsAffected为记录条数
 }
 
 func GetAllTeamCount() (int64, error) { //获取记录总数

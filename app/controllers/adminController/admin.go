@@ -2,7 +2,6 @@ package adminController
 
 import (
 	"TRS/app/midwares"
-	"TRS/app/models"
 	"TRS/app/services/teamService"
 	"TRS/app/utils"
 	"github.com/gin-gonic/gin"
@@ -34,7 +33,7 @@ func GetAllTeamInfo(c *gin.Context) {
 	committedTeamList, count1, err := teamService.GetAllIsCommittedTeam(1)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			committedTeamList = make([]models.Team, 0) //空切片[] 不同于nil!!!
+			committedTeamList = make([]teamService.TeamInfo, 0) //空切片[] 不同于nil!!!
 		} else {
 			utils.JsonInternalServerErrorResponse(c)
 			return
@@ -43,7 +42,7 @@ func GetAllTeamInfo(c *gin.Context) {
 	uncommittedTeamList, count2, err := teamService.GetAllIsCommittedTeam(2)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			uncommittedTeamList = make([]models.Team, 0) //空切片[]
+			uncommittedTeamList = make([]teamService.TeamInfo, 0) //空切片[]
 		} else {
 			utils.JsonInternalServerErrorResponse(c)
 			return
