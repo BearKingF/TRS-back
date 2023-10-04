@@ -21,6 +21,7 @@ func Init() {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true, // 关闭外键约束 提升数据库速度
+		//Logger: logger.Default.LogMode(logger.Info), //执行每条数据库相关语句都输出Debug()日志
 	})
 
 	if err != nil {

@@ -7,12 +7,13 @@ import (
 
 func GetTeamMember(teamID uint) ([]models.User, error) {
 
+	// 根据主键检索
 	result := database.DB.First(&models.User{}, teamID) // TeamID 为 models.User 的主键
 	if result.Error != nil {                            //团队为空
 		return nil, result.Error
 	}
 	var teamMemberList []models.User //切片
-	result = database.DB.Where(&models.Team{TeamID: teamID}).Find(&teamMemberList)
+	result = database.DB.Find(&teamMemberList, teamID)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -45,6 +46,8 @@ func GetAllIsCommittedTeam(R uint) ([]TeamInfo, int64, error) { //R取1或2
 	//find 方法在查询不到记录时不会报错！（此处利用这个特点）
 	result := database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).Select("team_id", "team_name", "captain_id", "total").Find(&teamList)
 	//Debug(): SELECT `team_id`,`team_name`,`captain_id`,`total` FROM `teams` WHERE `teams`.`status` = R
+
+	//或 result := database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).Omit("password", "status").Find(&teamList)
 
 	//不加Select其实也可以……
 	//result = database.DB.Model(&models.Team{}).Where(&models.Team{Status: R}).Debug().Find(&teamList)

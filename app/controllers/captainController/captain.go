@@ -206,7 +206,7 @@ func DeleteTeamMember(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200518, "不可移除队长")
 		return
 	}
-	//可以移除成员
+	//可以移除成员（其实使用的是Update函数）
 	err = teamService.UpdateTotal2(uint(user.TeamID)) //Total--
 	if err != nil {
 		utils.JsonInternalServerErrorResponse(c)

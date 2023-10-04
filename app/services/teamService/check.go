@@ -6,7 +6,7 @@ import (
 )
 
 func CheckTeamExistByTeamID(teamID uint) error {
-	result := database.DB.Where(&models.Team{TeamID: teamID}).First(&models.Team{})
+	result := database.DB.First(&models.Team{}, teamID)
 	return result.Error
 }
 
