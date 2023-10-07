@@ -1,18 +1,22 @@
 package main
 
 import (
-	"TRS/config/database"
+	"TRS/config/configStart"
 	"TRS/config/router"
+	"TRS/config/session"
 	"github.com/gin-gonic/gin"
 	"log"
 )
 
 func main() {
-	database.Init()
+	configStart.Init()
+
 	r := gin.Default()
+	session.Init(r)
 	router.Init(r)
 
 	err := r.Run()
+	//err := r.Run(":" + config.Config.GetString("server.port")) //原来是r.Run()
 	if err != nil {
 		log.Fatal("Server start error: ", err)
 	}

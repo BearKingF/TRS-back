@@ -7,7 +7,7 @@ import (
 
 var Config = viper.New()
 
-func init() {
+func Init() {
 	Config.SetConfigName("config")
 	Config.SetConfigType("yaml")
 	Config.AddConfigPath(".")

@@ -29,8 +29,13 @@ func UpdateTeamInfo(c *gin.Context) {
 		return
 	}
 
+	flag := midwares.CheckLogin(c)
+	if !flag {
+		utils.JsonErrorResponse(c, 200507, "未登录")
+		return
+	}
 	//判断是否为队长账户
-	flag := midwares.CheckCaptain(data.UserID)
+	flag = midwares.CheckCaptain(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
@@ -86,8 +91,14 @@ func Apply(c *gin.Context) {
 	if err != nil {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 	}
+
+	flag := midwares.CheckLogin(c)
+	if !flag {
+		utils.JsonErrorResponse(c, 200507, "未登录")
+		return
+	}
 	//判断是否为队长账户
-	flag := midwares.CheckCaptain(data.UserID)
+	flag = midwares.CheckCaptain(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
@@ -131,8 +142,13 @@ func DisApply(c *gin.Context) {
 	if err != nil {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 	}
+	flag := midwares.CheckLogin(c)
+	if !flag {
+		utils.JsonErrorResponse(c, 200507, "未登录")
+		return
+	}
 	//判断是否为队长账户
-	flag := midwares.CheckCaptain(data.UserID)
+	flag = midwares.CheckCaptain(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
@@ -172,8 +188,13 @@ func DeleteTeamMember(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 		return
 	}
+	flag := midwares.CheckLogin(c)
+	if !flag {
+		utils.JsonErrorResponse(c, 200507, "未登录")
+		return
+	}
 	//判断是否为队长账户
-	flag := midwares.CheckCaptain(data.UserID)
+	flag = midwares.CheckCaptain(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
@@ -233,8 +254,13 @@ func AddTeamMember(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 		return
 	}
+	flag := midwares.CheckLogin(c)
+	if !flag {
+		utils.JsonErrorResponse(c, 200507, "未登录")
+		return
+	}
 	//判断是否为队长账户
-	flag := midwares.CheckCaptain(data.UserID)
+	flag = midwares.CheckCaptain(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
@@ -300,8 +326,14 @@ func DeleteTeam(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 		return
 	}
+
+	flag := midwares.CheckLogin(c)
+	if !flag {
+		utils.JsonErrorResponse(c, 200507, "未登录")
+		return
+	}
 	//判断是否为队长账户
-	flag := midwares.CheckCaptain(data.UserID)
+	flag = midwares.CheckCaptain(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
@@ -355,8 +387,14 @@ func TransferCaptain(c *gin.Context) {
 	if err != nil {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 	}
+
+	flag := midwares.CheckLogin(c)
+	if !flag {
+		utils.JsonErrorResponse(c, 200507, "未登录")
+		return
+	}
 	//判断是否为队长账户
-	flag := midwares.CheckCaptain(data.UserID)
+	flag = midwares.CheckCaptain(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return

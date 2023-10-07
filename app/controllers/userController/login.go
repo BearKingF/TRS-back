@@ -2,6 +2,7 @@ package userController
 
 import (
 	"TRS/app/models"
+	"TRS/app/services/sessionService"
 	"TRS/app/services/userService"
 	"TRS/app/utils"
 	"github.com/gin-gonic/gin"
@@ -51,6 +52,11 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	err = sessionService.SetUserSession(c, user) //将该用户置成登录状态
+	if err != nil {
+		utils.JsonInternalServerErrorResponse(c)
+		return
+	}
 	//5. 登录成功，返回用户信息
 	utils.JsonSuccessResponse(c, user)
 }

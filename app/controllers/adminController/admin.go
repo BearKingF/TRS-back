@@ -20,8 +20,14 @@ func GetAllTeamInfo(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 		return
 	}
+
+	flag := midwares.CheckLogin(c)
+	if !flag {
+		utils.JsonErrorResponse(c, 200507, "未登录")
+		return
+	}
 	//判断是否为管理员账户
-	flag := midwares.CheckAdmin(data.UserID)
+	flag = midwares.CheckAdmin(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200520, "非管理员账户")
 		return

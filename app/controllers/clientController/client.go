@@ -32,7 +32,8 @@ func UpdateUserInfo(c *gin.Context) {
 		return
 	}
 
-	flag := midwares.CheckLogin(data.ID)
+	flag := midwares.CheckLogin(c)
+	//flag := midwares.CheckLogin(data.ID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200507, "未登录")
 		return
@@ -110,7 +111,8 @@ func CreateTeam(c *gin.Context) {
 		return
 	}
 
-	flag := midwares.CheckLogin(data.UserID)
+	flag := midwares.CheckLogin(c)
+	//flag := midwares.CheckLogin(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200507, "未登录")
 		return
@@ -165,7 +167,8 @@ func JoinTeam(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 		return
 	}
-	flag := midwares.CheckLogin(data.UserID)
+	flag := midwares.CheckLogin(c)
+	//flag := midwares.CheckLogin(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200507, "未登录")
 		return
@@ -225,7 +228,8 @@ func GetTeamInfo(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 		return
 	}
-	flag := midwares.CheckLogin(data.UserID)
+	flag := midwares.CheckLogin(c)
+	//flag := midwares.CheckLogin(data.UserID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200507, "未登录")
 		return
