@@ -3,6 +3,7 @@ package captainController
 import (
 	"TRS/app/midwares"
 	"TRS/app/models"
+	"TRS/app/services/sessionService"
 	"TRS/app/services/teamService"
 	"TRS/app/services/userService"
 	"TRS/app/utils"
@@ -13,8 +14,7 @@ import (
 /* 编辑团队信息(PUT)（可修改团队名称和密码）*/
 
 type UpdateTeamInfoData struct {
-	UserID uint `json:"user_id" binding:"required"`
-	//TeamID          uint   `json:"team_id" binding:"required"`
+	//UserID uint `json:"user_id" binding:"required"`
 	TeamName        string `json:"team_name"`    //团队名称不可重复
 	OldPassword     string `json:"old_password"` //如果要修改密码，需要先输入旧密码
 	NewPassword     string `json:"new_password"`
@@ -29,18 +29,18 @@ func UpdateTeamInfo(c *gin.Context) {
 		return
 	}
 
-	flag := midwares.CheckLogin(c)
-	if !flag {
+	user, err := sessionService.GetUserSession(c)
+	if err != nil {
 		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
 	}
+
 	//判断是否为队长账户
-	flag = midwares.CheckCaptain(data.UserID)
+	flag := midwares.CheckCaptain(user.ID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
 	}
-	user, _ := userService.GetUserByID(data.UserID)
+	//user, _ := userService.GetUserByID(data.UserID)
 
 	//判断团队名是否重复
 	if data.TeamName != "" {
@@ -81,30 +81,29 @@ func UpdateTeamInfo(c *gin.Context) {
 
 /* 提交报名(PUT) */
 
-type ApplyData struct {
-	UserID uint `json:"user_id" binding:"required"`
-}
+//type ApplyData struct {
+//	UserID uint `json:"user_id" binding:"required"`
+//}
 
 func Apply(c *gin.Context) {
-	var data ApplyData
-	err := c.ShouldBindJSON(&data)
+	//var data ApplyData
+	//err := c.ShouldBindJSON(&data)
+	//if err != nil {
+	//	utils.JsonErrorResponse(c, 200501, "参数错误")
+	//}
+	user, err := sessionService.GetUserSession(c)
 	if err != nil {
-		utils.JsonErrorResponse(c, 200501, "参数错误")
+		utils.JsonErrorResponse(c, 200507, "未登录")
 	}
 
-	flag := midwares.CheckLogin(c)
-	if !flag {
-		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
-	}
 	//判断是否为队长账户
-	flag = midwares.CheckCaptain(data.UserID)
+	flag := midwares.CheckCaptain(user.ID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
 	}
 
-	user, _ := userService.GetUserByID(data.UserID)
+	//user, _ := userService.GetUserByID(data.UserID)
 	team, _ := teamService.GetTeamByTeamID(uint(user.TeamID))
 
 	//判断团队人数是否符合要求
@@ -132,29 +131,30 @@ func Apply(c *gin.Context) {
 
 /* 撤销报名(DEL) */
 
-type DisApplyData struct {
-	UserID uint `json:"user_id" binding:"required"`
-}
+//type DisApplyData struct {
+//	UserID uint `json:"user_id" binding:"required"`
+//}
 
 func DisApply(c *gin.Context) {
-	var data DisApplyData
-	err := c.ShouldBindJSON(&data)
+	//var data DisApplyData
+	//err := c.ShouldBindJSON(&data)
+	//if err != nil {
+	//	utils.JsonErrorResponse(c, 200501, "参数错误")
+	//}
+
+	user, err := sessionService.GetUserSession(c)
 	if err != nil {
-		utils.JsonErrorResponse(c, 200501, "参数错误")
-	}
-	flag := midwares.CheckLogin(c)
-	if !flag {
 		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
 	}
+
 	//判断是否为队长账户
-	flag = midwares.CheckCaptain(data.UserID)
+	flag := midwares.CheckCaptain(user.ID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
 	}
 
-	user, _ := userService.GetUserByID(data.UserID)
+	//user, _ := userService.GetUserByID(data.UserID)
 
 	//判断团队是否已提交过报名
 	if teamService.CheckStatus(uint(user.TeamID)) == false {
@@ -176,7 +176,7 @@ func DisApply(c *gin.Context) {
 /* 移除团队成员(DEL)（不可删除自己）（必须要在团队未提交报名状态下）*/
 
 type DeleteTeamMemberData struct {
-	UserID   uint `json:"user_id" binding:"required"`
+	//UserID   uint `json:"user_id" binding:"required"`
 	MemberID uint `json:"member_id" binding:"required"` //要删除的成员id
 
 }
@@ -188,19 +188,20 @@ func DeleteTeamMember(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 		return
 	}
-	flag := midwares.CheckLogin(c)
-	if !flag {
+
+	user, err := sessionService.GetUserSession(c)
+	if err != nil {
 		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
 	}
+
 	//判断是否为队长账户
-	flag = midwares.CheckCaptain(data.UserID)
+	flag := midwares.CheckCaptain(user.ID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
 	}
 
-	user, _ := userService.GetUserByID(data.UserID)
+	//user, _ := userService.GetUserByID(data.UserID)
 	//判断团队是否为已提交报名状态
 	flag = teamService.CheckStatus(uint(user.TeamID))
 	if flag {
@@ -223,7 +224,7 @@ func DeleteTeamMember(c *gin.Context) {
 		return
 	}
 	//不可删除自己（队长只有转移了队长职位，才可以退出团队）
-	if data.MemberID == data.UserID {
+	if data.MemberID == user.ID {
 		utils.JsonErrorResponse(c, 200518, "不可移除队长")
 		return
 	}
@@ -243,7 +244,7 @@ func DeleteTeamMember(c *gin.Context) {
 /* 添加团队成员(PUT) */
 
 type AddTeamMemberData struct {
-	UserID   uint `json:"user_id" binding:"required"`
+	//UserID   uint `json:"user_id" binding:"required"`
 	MemberID uint `json:"member_id" binding:"required"` //要添加的成员id
 }
 
@@ -254,19 +255,20 @@ func AddTeamMember(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 		return
 	}
-	flag := midwares.CheckLogin(c)
-	if !flag {
+
+	user, err := sessionService.GetUserSession(c)
+	if err != nil {
 		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
 	}
+
 	//判断是否为队长账户
-	flag = midwares.CheckCaptain(data.UserID)
+	flag := midwares.CheckCaptain(user.ID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
 	}
 
-	user, _ := userService.GetUserByID(data.UserID)
+	//user, _ := userService.GetUserByID(data.UserID)
 	//判断团队是否为已提交报名状态
 	flag = teamService.CheckStatus(uint(user.TeamID))
 	if flag {
@@ -315,7 +317,7 @@ func AddTeamMember(c *gin.Context) {
 /* 解散团队(DEL)（解散团队要输入团队密码）（要在团队未提交报名的状态下）*/
 
 type DeleteTeamData struct {
-	UserID   uint   `json:"user_id" binding:"required"`
+	//UserID   uint   `json:"user_id" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -327,18 +329,18 @@ func DeleteTeam(c *gin.Context) {
 		return
 	}
 
-	flag := midwares.CheckLogin(c)
-	if !flag {
+	user, err := sessionService.GetUserSession(c)
+	if err != nil {
 		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
 	}
+
 	//判断是否为队长账户
-	flag = midwares.CheckCaptain(data.UserID)
+	flag := midwares.CheckCaptain(user.ID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
 	}
-	user, _ := userService.GetUserByID(data.UserID)
+	//user, _ := userService.GetUserByID(data.UserID)
 	teamID := uint(user.TeamID)
 	//判断团队是否为已提交报名状态
 	flag = teamService.CheckStatus(teamID)
@@ -365,7 +367,7 @@ func DeleteTeam(c *gin.Context) {
 		utils.JsonInternalServerErrorResponse(c)
 		return
 	}
-	err = userService.UpdateCaptainFlag(data.UserID) //更改队长的isCaptain状态
+	err = userService.UpdateCaptainFlag(user.ID) //更改队长的isCaptain状态
 	if err != nil {
 		utils.JsonInternalServerErrorResponse(c)
 		return
@@ -377,7 +379,7 @@ func DeleteTeam(c *gin.Context) {
 /* 转移队长职位(PUT) */
 
 type TransferCaptainData struct {
-	UserID   uint `json:"user_id" binding:"required"`
+	//UserID   uint `json:"user_id" binding:"required"`
 	MemberID uint `json:"member_id" binding:"required"`
 }
 
@@ -388,13 +390,13 @@ func TransferCaptain(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 	}
 
-	flag := midwares.CheckLogin(c)
-	if !flag {
+	user, err := sessionService.GetUserSession(c)
+	if err != nil {
 		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
 	}
+
 	//判断是否为队长账户
-	flag = midwares.CheckCaptain(data.UserID)
+	flag := midwares.CheckCaptain(user.ID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200514, "非队长账户")
 		return
@@ -410,7 +412,7 @@ func TransferCaptain(c *gin.Context) {
 			return
 		}
 	}
-	user, _ := userService.GetUserByID(data.UserID)
+	//user, _ := userService.GetUserByID(data.UserID)
 
 	//判断团队是否为已提交报名状态
 	flag = teamService.CheckStatus(uint(user.TeamID))
@@ -426,7 +428,7 @@ func TransferCaptain(c *gin.Context) {
 	}
 
 	//可以转移队长职位
-	err = userService.UpdateCaptainFlag(data.UserID)
+	err = userService.UpdateCaptainFlag(user.ID)
 	if err != nil {
 		utils.JsonInternalServerErrorResponse(c)
 		return

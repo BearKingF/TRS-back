@@ -1,8 +1,8 @@
 package clientController
 
 import (
-	"TRS/app/midwares"
 	"TRS/app/models"
+	"TRS/app/services/sessionService"
 	"TRS/app/services/teamService"
 	"TRS/app/services/userService"
 	"TRS/app/utils"
@@ -13,7 +13,7 @@ import (
 /* 编辑个人信息(PUT) */
 
 type UpdateUserinfoData struct {
-	ID              uint   `json:"id" binding:"required"` //必需
+	// ID              uint   `json:"id" binding:"required"` //必需
 	Username        string `json:"username"`
 	Sex             string `json:"sex"`
 	PhoneNum        string `json:"phone_num"`
@@ -32,13 +32,12 @@ func UpdateUserInfo(c *gin.Context) {
 		return
 	}
 
-	flag := midwares.CheckLogin(c)
-	//flag := midwares.CheckLogin(data.ID)
-	if !flag {
+	//不传入UserID的参数，而是用GetUserSession来获取当前登录的用户
+	user, err := sessionService.GetUserSession(c)
+	if err != nil {
 		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
 	}
-	user, _ := userService.GetUserByID(data.ID)
+	//user, _ := userService.GetUserByID(data.ID)
 	//判断修改的手机号是否已被注册
 	if data.PhoneNum != "" {
 		err = userService.CheckUserExistByPhoneNum(data.PhoneNum)
@@ -64,6 +63,7 @@ func UpdateUserInfo(c *gin.Context) {
 	}
 
 	//判断若要修改密码，输入的原密码是否正确及两次输入的新密码是否一致
+	var flag bool
 	if data.OldPassword != "" || data.NewPassword != "" || data.ConfirmPassword != "" {
 		if data.OldPassword != "" && data.NewPassword != "" && data.ConfirmPassword != "" {
 			flag = userService.CheckPwd(data.OldPassword, user.Password) && userService.CheckPwd(data.NewPassword, data.ConfirmPassword)
@@ -79,7 +79,8 @@ func UpdateUserInfo(c *gin.Context) {
 
 	// 更新用户信息
 	err = userService.UpdateUserInfo(models.User{
-		ID:       data.ID,
+		//ID:       data.ID,
+		ID:       user.ID,
 		Username: data.Username,
 		Sex:      data.Sex,
 		PhoneNum: data.PhoneNum,
@@ -98,7 +99,7 @@ func UpdateUserInfo(c *gin.Context) {
 /* 创建团队(POST) */
 
 type CreateTeamData struct {
-	UserID   uint   `json:"user_id" binding:"required"`
+	//UserID   uint   `json:"user_id" binding:"required"`
 	TeamName string `json:"team_name" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
@@ -111,14 +112,12 @@ func CreateTeam(c *gin.Context) {
 		return
 	}
 
-	flag := midwares.CheckLogin(c)
-	//flag := midwares.CheckLogin(data.UserID)
-	if !flag {
+	user, err := sessionService.GetUserSession(c)
+	if err != nil {
 		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
 	}
 
-	user, _ := userService.GetUserByID(data.UserID)
+	// user, _ := userService.GetUserByID(data.UserID)
 	if user.TeamID != -1 {
 		utils.JsonErrorResponse(c, 200510, "已加入团队") //限制每人只可加入一个团队
 		return
@@ -137,17 +136,18 @@ func CreateTeam(c *gin.Context) {
 	//可以创建团队
 	teamID, err := teamService.CreateTeam(models.Team{
 		TeamName:  data.TeamName,
-		CaptainID: data.UserID,
-		Password:  data.Password,
-		Total:     1,
-		Status:    2, //状态：未提交报名
+		CaptainID: user.ID,
+		//CaptainID: data.UserID,
+		Password: data.Password,
+		Total:    1,
+		Status:   2, //状态：未提交报名
 	})
 	if err != nil {
 		utils.JsonInternalServerErrorResponse(c)
 		return
 	}
-	_ = userService.UpdateTeamID(data.UserID, int(teamID))
-	_ = userService.UpdateCaptainFlag(data.UserID) //团队创建者成为队长
+	_ = userService.UpdateTeamID(user.ID, int(teamID))
+	_ = userService.UpdateCaptainFlag(user.ID) //团队创建者成为队长
 	//返回成功响应
 	utils.JsonSuccessResponse(c, nil)
 }
@@ -155,9 +155,9 @@ func CreateTeam(c *gin.Context) {
 /* 加入团队(POST) */
 
 type JoinTeamData struct {
-	UserID   uint   `json:"user_id" binding:"required"`
-	TeamID   uint   `json:"team_id" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	//UserID   uint   `json:"user_id" binding:"required"`
+	TeamID   uint   `json:"team_id" binding:"required"`  //团队ID
+	Password string `json:"password" binding:"required"` //团队密码
 }
 
 func JoinTeam(c *gin.Context) {
@@ -167,11 +167,10 @@ func JoinTeam(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 		return
 	}
-	flag := midwares.CheckLogin(c)
-	//flag := midwares.CheckLogin(data.UserID)
-	if !flag {
+
+	user, err := sessionService.GetUserSession(c)
+	if err != nil {
 		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
 	}
 
 	err = teamService.CheckTeamExistByTeamID(data.TeamID)
@@ -200,14 +199,14 @@ func JoinTeam(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200515, "团队已提交报名")
 		return
 	}
-	user, _ := userService.GetUserByID(data.UserID)
+	// user, _ := userService.GetUserByID(data.UserID)
 	if user.TeamID != -1 {
 		utils.JsonErrorResponse(c, 200510, "已加入团队") //限制每人只可加入一个团队
 		return
 	}
 
 	//可以加入该团队
-	_ = userService.UpdateTeamID(data.UserID, int(data.TeamID))
+	_ = userService.UpdateTeamID(user.ID, int(data.TeamID))
 	_ = teamService.UpdateTotal(data.TeamID)
 	//返回成功响应
 	utils.JsonSuccessResponse(c, nil)
@@ -217,7 +216,7 @@ func JoinTeam(c *gin.Context) {
 /* 获取团队信息(GET) */
 
 type GetTeamInfoData struct {
-	UserID uint `form:"user_id" binding:"required"` //form???
+	// UserID uint `form:"user_id" binding:"required"` //form???
 	TeamID uint `form:"team_id" binding:"required"`
 }
 
@@ -228,13 +227,13 @@ func GetTeamInfo(c *gin.Context) {
 		utils.JsonErrorResponse(c, 200501, "参数错误")
 		return
 	}
-	flag := midwares.CheckLogin(c)
-	//flag := midwares.CheckLogin(data.UserID)
-	if !flag {
+
+	user, err := sessionService.GetUserSession(c)
+	if err != nil {
 		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
 	}
-	user, _ := userService.GetUserByID(data.UserID)
+
+	// user, _ := userService.GetUserByID(data.UserID)
 	if user.TeamID != int(data.TeamID) {
 		utils.JsonErrorResponse(c, 200513, "权限错误")
 		return

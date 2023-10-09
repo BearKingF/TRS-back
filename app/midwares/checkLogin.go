@@ -2,16 +2,18 @@ package midwares
 
 import (
 	"TRS/app/services/sessionService"
+	"TRS/app/utils"
 	"github.com/gin-gonic/gin"
 )
 
-// 判断用户是否存在
+// 中间件：判断用户是否登录(预处理)
 
-func CheckLogin(c *gin.Context) bool {
-	//_, err := userService.GetUserByID(id)
+func CheckLogin(c *gin.Context) {
+
 	isLogin := sessionService.CheckUserSession(c)
 	if !isLogin {
-		return false
+		utils.JsonErrorResponse(c, 200507, "未登录")
+		c.Abort()
 	}
-	return true
+	c.Next()
 }

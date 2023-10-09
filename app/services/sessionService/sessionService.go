@@ -17,7 +17,9 @@ func ClearUserSession(c *gin.Context) { //清除用户session
 
 func SetUserSession(c *gin.Context, user *models.User) error {
 	webSession := sessions.Default(c)
-	webSession.Options(sessions.Options{MaxAge: 3600 * 24 * 7})
+	webSession.Options(sessions.Options{MaxAge: 3600 * 24 * 7, Path: "/api"}) //Path: "/api"
+	//对于浏览器来说，是要指定Path的
+	//同源策略问题：解决———跨域资源共享（域，即Path前缀要一样）
 	webSession.Set("id", user.ID)
 	return webSession.Save()
 }

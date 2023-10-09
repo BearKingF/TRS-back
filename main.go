@@ -14,6 +14,7 @@ func main() {
 	r := gin.Default()
 	session.Init(r)
 	router.Init(r)
+	//r.Use(sessions.Sessions("mysession", store))
 
 	err := r.Run()
 	//err := r.Run(":" + config.Config.GetString("server.port")) //原来是r.Run()

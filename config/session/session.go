@@ -6,9 +6,11 @@ import (
 )
 
 func Init(r *gin.Engine) {
+
 	config := getConfig()
 	switch config.Driver {
 	case string(Redis):
+
 		setRedis(r, config.Name)
 		break
 	case string(Memory):

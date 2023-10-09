@@ -29,8 +29,6 @@ func UpdateCaptainFlag(id uint) error { //更改isCaptain信息
 }
 
 func UpdateAllTeamID(teamID uint) error { //批量更新
-	//db.Model(User{}).Where("role = ?", "admin").Updates(User{Name: "hello", Age: 18})
-	//不知道对不对？
 	result := database.DB.Where(&models.User{TeamID: int(teamID)}).Updates(models.User{TeamID: -1})
 	return result.Error
 }

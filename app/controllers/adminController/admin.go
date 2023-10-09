@@ -2,6 +2,7 @@ package adminController
 
 import (
 	"TRS/app/midwares"
+	"TRS/app/services/sessionService"
 	"TRS/app/services/teamService"
 	"TRS/app/utils"
 	"github.com/gin-gonic/gin"
@@ -9,25 +10,25 @@ import (
 
 /* 获取所有团队信息(GET) */
 
-type GetAllTeamInfoData struct {
-	UserID uint `form:"user_id" binding:"required"` //form: 对应c.ShouldBindQuery(&data)
-}
+//type GetAllTeamInfoData struct {
+//	UserID uint `form:"user_id" binding:"required"` //form: 对应c.ShouldBindQuery(&data)
+//}
 
 func GetAllTeamInfo(c *gin.Context) {
-	var data GetAllTeamInfoData
-	err := c.ShouldBindQuery(&data)
+	//var data GetAllTeamInfoData
+	//err := c.ShouldBindQuery(&data)
+	//if err != nil {
+	//	utils.JsonErrorResponse(c, 200501, "参数错误")
+	//	return
+	//}
+
+	user, err := sessionService.GetUserSession(c)
 	if err != nil {
-		utils.JsonErrorResponse(c, 200501, "参数错误")
-		return
+		utils.JsonErrorResponse(c, 200507, "未登录")
 	}
 
-	flag := midwares.CheckLogin(c)
-	if !flag {
-		utils.JsonErrorResponse(c, 200507, "未登录")
-		return
-	}
 	//判断是否为管理员账户
-	flag = midwares.CheckAdmin(data.UserID)
+	flag := midwares.CheckAdmin(user.ID)
 	if !flag {
 		utils.JsonErrorResponse(c, 200520, "非管理员账户")
 		return
